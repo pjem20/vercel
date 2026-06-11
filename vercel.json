@@ -1,9 +1,14 @@
 {
   "version": 2,
-  "builds": [
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs22.x"
+    }
+  },
+  "routes": [
     {
-      "src": "api/generate.js",
-      "use": "@vercel/node"
+      "src": "/api/(.*)",
+      "dest": "/api/generate.js"
     }
   ]
 }
