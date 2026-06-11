@@ -1,15 +1,13 @@
 module.exports = async (req, res) => {
-  // ✅ CORS (required for Hostinger frontend)
+  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  // ✅ Handle preflight request
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // Only allow POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -30,15 +28,12 @@ module.exports = async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openrouter/free",
+          model: "openai/gpt-oss-120b:free",
           messages: [
             {
               role: "system",
               content: `
-You are a curiosity engine.
-
-Return ONLY valid JSON in this exact schema:
-
+Return ONLY valid JSON in this format:
 {
   "summary": "",
   "weirdFacts": [],
@@ -48,8 +43,6 @@ Return ONLY valid JSON in this exact schema:
   "documentaries": [],
   "deepLinks": []
 }
-
-Focus on obscure, surprising, interconnected knowledge. No markdown. No explanation.
 `
             },
             {
@@ -63,12 +56,15 @@ Focus on obscure, surprising, interconnected knowledge. No markdown. No explanat
 
     const data = await response.json();
 
-return res.status(200).json({
-  debug: true,
-  openrouter_response: data
-});
+    const content = data?.choices?.[0]?.message?.content;
 
-    // ✅ Safe JSON parsing (prevents crashes if model returns bad format)
+    if (!content) {
+      return res.status(500).json({
+        error: "No content from model",
+        debug: data
+      });
+    }
+
     let parsed;
 
     try {
@@ -89,7 +85,8 @@ return res.status(200).json({
 
   } catch (err) {
     return res.status(500).json({
-      error: "Server error"
+      error: "Server error",
+      message: err.message
     });
   }
 };
