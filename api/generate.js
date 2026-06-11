@@ -63,7 +63,10 @@ Focus on obscure, surprising, interconnected knowledge. No markdown. No explanat
 
     const data = await response.json();
 
-    const content = data?.choices?.[0]?.message?.content || "{}";
+return res.status(200).json({
+  debug: true,
+  openrouter_response: data
+});
 
     // ✅ Safe JSON parsing (prevents crashes if model returns bad format)
     let parsed;
