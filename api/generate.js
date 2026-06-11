@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-120b:free",
+          model: "mistralai/mistral-7b-instruct",
           messages: [
             {
               role: "system",
