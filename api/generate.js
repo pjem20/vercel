@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "nvidia/llama-nemotron-rerank-vl-1b-v2:free",
+          model: "nex-agi/nex-n2-pro:free",
           messages: [
             {
               role: "system",
