@@ -1,4 +1,15 @@
 module.exports = async (req, res) => {
+  // ✅ CORS (required for Hostinger frontend)
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  // ✅ Handle preflight request
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  // Only allow POST
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -22,8 +33,28 @@ module.exports = async (req, res) => {
           model: "mistralai/mistral-7b-instruct:free",
           messages: [
             {
+              role: "system",
+              content: `
+You are a curiosity engine.
+
+Return ONLY valid JSON in this exact schema:
+
+{
+  "summary": "",
+  "weirdFacts": [],
+  "people": [],
+  "events": [],
+  "books": [],
+  "documentaries": [],
+  "deepLinks": []
+}
+
+Focus on obscure, surprising, interconnected knowledge. No markdown. No explanation.
+`
+            },
+            {
               role: "user",
-              content: `Return JSON rabbit hole for: ${topic}`
+              content: `Topic: ${topic}`
             }
           ]
         })
@@ -34,8 +65,28 @@ module.exports = async (req, res) => {
 
     const content = data?.choices?.[0]?.message?.content || "{}";
 
-    return res.status(200).json(JSON.parse(content));
+    // ✅ Safe JSON parsing (prevents crashes if model returns bad format)
+    let parsed;
+
+    try {
+      parsed = JSON.parse(content);
+    } catch (e) {
+      parsed = {
+        summary: content,
+        weirdFacts: [],
+        people: [],
+        events: [],
+        books: [],
+        documentaries: [],
+        deepLinks: []
+      };
+    }
+
+    return res.status(200).json(parsed);
+
   } catch (err) {
-    return res.status(500).json({ error: "Server error" });
+    return res.status(500).json({
+      error: "Server error"
+    });
   }
 };
