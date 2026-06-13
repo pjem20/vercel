@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openrouter/owl-alpha",
+          model: "poolside/laguna-m.1:free",
           messages: [
             {
               role: "system",
